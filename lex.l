@@ -23,6 +23,11 @@ ws                          [ \r\t\n]*
 
 "="                         return ASSIGN_INTERMEDIATE;
 
+"*"													return TOKEN_MULT;
+"+"													return TOKEN_PLUS;
+"-"													return TOKEN_SUB;
+"/"													return TOKEN_DIV;
+
 "<"						              return LESS_THAN;
 ">"          								return GREATER_THAN;
 "=="               					return EQUAL_TO;

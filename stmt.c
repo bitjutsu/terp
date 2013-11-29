@@ -59,7 +59,7 @@ ParseNode *createBool(BoolOp op, ParseNode *left, ParseNode *right) {
   // can either be false or true (0 or 1)
 	stmt->type = tBOOL;
   stmt->value = 0;
-  stmt->op = op;
+  stmt->bOp = op;
   stmt->children[0] = left;
   stmt->children[1] = right;
 
@@ -84,6 +84,18 @@ ParseNode *createVariable(char *name) {
   stmt->value = 0;
 
   return stmt;
+}
+
+ParseNode *createArith(ArithOp op, ParseNode *left, ParseNode *right) {
+	ParseNode *stmt = allocateNode(2);
+
+	stmt->type = tARITH;
+	stmt->aOp = op;
+	stmt->children[0] = left;
+	stmt->children[1] = right;
+	stmt->value = 0;
+
+	return stmt;
 }
 
 void deleteStatement(ParseNode *node) {

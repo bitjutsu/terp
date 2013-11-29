@@ -32,6 +32,7 @@ typedef void* yyscan_t;
 }
 
 %left '<' '>' '==' LESS_THAN GREATER_THAN EQUAL_TO
+%left '+' '-' '*' '/' TOKEN_PLUS TOKEN_SUB TOKEN_MULT TOKEN_DIV
 
 %token IF_START
 %token THEN
@@ -46,6 +47,7 @@ typedef void* yyscan_t;
 %type <statement> stmt
 %type <statement> exp
 %type <statement> bool
+%type <statement> arith
 
 %%
 input
@@ -66,8 +68,16 @@ bool
     ;
 
 exp
-    : VAL { $$ = createNumber($1); }
+		: arith
+    | VAL { $$ = createNumber($1); }
     | VAR { $$ = createVariable($1); }
     ;
+
+arith
+		: exp TOKEN_MULT exp { $$ = createArith(aMULT, $1, $3); }
+		| exp TOKEN_PLUS exp { $$ = createArith(aPLUS, $1, $3); }
+		| exp TOKEN_SUB exp { $$ = createArith(aSUB, $1, $3); }
+		| exp TOKEN_DIV exp { $$ = createArith(aDIV, $1, $3); }
+		;
 
 %%

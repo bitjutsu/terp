@@ -7,19 +7,28 @@ typedef enum tagBoolOp {
   bEQUALTO
 } BoolOp;
 
+typedef enum tagArithOp {
+	aPLUS,
+	aDIV,
+	aSUB,
+	aMULT
+} ArithOp;
+
 typedef enum tagType {
 	tASSIGN,
 	tIF,
 	tIFELSE,
 	tBOOL,
 	tNUM,
-	tVAR
+	tVAR,
+	tARITH
 } Type;
 
 // TODO: make a union, not everything has a name or an operation
 typedef struct tagParseNode {
   Type type;
-	BoolOp op;
+	ArithOp aOp;
+	BoolOp bOp;
   char *name;
   int value; // all statements have a value - gets propagated up tree from leaves when evaluating
 
@@ -43,6 +52,9 @@ ParseNode *createNumber(int value);
 
 // Create a variable
 ParseNode *createVariable(char *name);
+
+// Create an arithmetic expression
+ParseNode *createArith(ArithOp op, ParseNode *left, ParseNode *right);
 
 // Delete a statement (free from memory)
 void deleteStatement(ParseNode *node);

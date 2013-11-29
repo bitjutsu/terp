@@ -83,7 +83,7 @@ int evaluate(ParseNode *stmt, State *state) {
 		// make sure both sides resolve into an integer (should always as ints are initialized to 0)
 		left = evaluate(stmt->children[0], state);
 		right = evaluate(stmt->children[1], state);
-		switch(stmt->op) {
+		switch(stmt->bOp) {
 		case bLESSTHAN:
 			return left < right;
 		case bGREATERTHAN:
@@ -108,6 +108,20 @@ int evaluate(ParseNode *stmt, State *state) {
 			// stmt->value might not be correct, obtain value from state
 			k = kh_get(32, state->h, stmt->name);
 			return kh_val(state->h, k);
+		}
+	case tARITH:
+		switch(stmt->aOp) {
+		case aPLUS:
+			return evaluate(stmt->children[0], state) + evaluate(stmt->children[1], state);
+		case aSUB:
+			return evaluate(stmt->children[0], state) - evaluate(stmt->children[1], state);
+		case aDIV:
+			return evaluate(stmt->children[0], state) / evaluate(stmt->children[1], state);
+		case aMULT:
+			return evaluate(stmt->children[0], state) * evaluate(stmt->children[1], state);
+		default:
+			// whoops
+			return -1;
 		}
 	default:
 		// if you reach here you have a bad problem
