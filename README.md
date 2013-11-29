@@ -1,14 +1,14 @@
-y_0 (y nought)
+terp
 ===
 
 A programming language because computers.
 
 Use:
 ====
-`>` is the terp (the interpreter) prompt, `:` is the evaluated value of the statement.
+`>` is the terp prompt, `:` is the evaluated value of the statement.
 ```
-> 3
-: 3
+> 3 + 1
+: 4
 > y = 4
 : 4
 > if y < 5 then y = 6 end
