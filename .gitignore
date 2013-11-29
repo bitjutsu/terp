@@ -16,3 +16,11 @@
 *.exe
 *.out
 *.app
+terp
+
+# bison/flex generated source/headers
+lex.c
+lex.h
+parse.c
+parse.h
+
