@@ -28,6 +28,9 @@ ws                          [ \r\t\n]*
 "-"													return TOKEN_SUB;
 "/"													return TOKEN_DIV;
 
+"true"											return TOKEN_TRUE;
+"false"											return TOKEN_FALSE;
+
 "<"						              return LESS_THAN;
 ">"          								return GREATER_THAN;
 "=="               					return EQUAL_TO;

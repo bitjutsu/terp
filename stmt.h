@@ -14,24 +14,57 @@ typedef enum tagArithOp {
 	aMULT
 } ArithOp;
 
-typedef enum tagType {
-	tASSIGN,
-	tIF,
-	tIFELSE,
+typedef enum tagStmtType {
+	sASSIGN,
+	sIF,
+	sIFELSE,
+	sBOOL,
+	sINT,
+	sVAR,
+	sARITH
+} StmtType;
+
+typedef enum tagValueType {
+	tNIL,
 	tBOOL,
-	tNUM,
-	tVAR,
-	tARITH
-} Type;
+	tINT,
+	tREAL,
+	tSTR,
+	tSET
+} ValueType;
 
-// TODO: make a union, not everything has a name or an operation
+// forward-declare tagElement to solve circular dependency
+struct tagElement;
+
+typedef union tagValue {
+	int integer;
+	int boolean;
+	char *string;
+	struct tagElement **set;
+} Value;
+
+typedef struct tagElement {
+	ValueType type;
+	Value value;
+} Element;
+
+typedef union tagOp {
+	ArithOp arithop;
+	BoolOp boolop;
+} Op;
+
+// TODO: not everything has a name or an operation
 typedef struct tagParseNode {
-  Type type;
-	ArithOp aOp;
-	BoolOp bOp;
-  char *name;
-  int value; // all statements have a value - gets propagated up tree from leaves when evaluating
+  StmtType sType;
+	Op op;
 
+  char *name;
+
+	// all statements have a value - gets propagated up tree from leaves when evaluating
+	ValueType vType;
+	Value value;
+
+	// tree isn't necessarily binary
   struct tagParseNode **children;
 } ParseNode;
 
@@ -46,9 +79,10 @@ ParseNode *createIfElse(ParseNode *cond, ParseNode *true, ParseNode *false);
 
 // Create a boolean statement
 ParseNode *createBool(BoolOp op, ParseNode *left, ParseNode *right);
+ParseNode *createBoolTerminal(int value);
 
 // Create an integer value
-ParseNode *createNumber(int value);
+ParseNode *createInt(int value);
 
 // Create a variable
 ParseNode *createVariable(char *name);

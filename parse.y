@@ -39,6 +39,9 @@ typedef void* yyscan_t;
 %token ELSE
 %token IF_END
 
+%token TOKEN_TRUE
+%token TOKEN_FALSE
+
 %token ASSIGN_INTERMEDIATE
 
 %token <name> VAR
@@ -59,17 +62,20 @@ stmt
     | IF_START bool THEN stmt IF_END { $$ = createIf($2, $4); }
     | IF_START bool THEN stmt ELSE stmt IF_END { $$ = createIfElse($2, $4, $6); }
 		| exp
+		| bool
     ;
 
 bool
     : exp LESS_THAN exp { $$ = createBool(bLESSTHAN, $1, $3); }
     | exp GREATER_THAN exp { $$ = createBool(bGREATERTHAN, $1, $3); }
     | exp EQUAL_TO exp { $$ = createBool(bEQUALTO, $1, $3); }
+		| TOKEN_TRUE { $$ = createBoolTerminal(1); }
+		| TOKEN_FALSE { $$ = createBoolTerminal(0); }
     ;
 
 exp
 		: arith
-    | VAL { $$ = createNumber($1); }
+    | VAL { $$ = createInt($1); }
     | VAR { $$ = createVariable($1); }
     ;
 

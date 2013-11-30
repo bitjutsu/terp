@@ -7,7 +7,13 @@ ParseNode *allocateNode(int childNum) {
     ParseNode *node = (ParseNode *)malloc(sizeof *node);
 
     // child nodes
-    node->children = malloc(childNum * sizeof(ParseNode *));
+		if (childNum != 0) {
+			node->children = (ParseNode **)malloc(sizeof(childNum*sizeof(ParseNode *) + 1));
+			// add null pointer for great justice (and also to avoid segfaults)
+			node->children[childNum] = NULL;
+		} else {
+			node->children = NULL;
+		}
 
     return node;
 }
@@ -16,9 +22,10 @@ ParseNode *createAssign(ParseNode *var, ParseNode *val) {
     // 2 child nodes required
     ParseNode *assign = allocateNode(2);
 
+		assign->sType = sASSIGN;
     // assign takes value 0 (nil)
-		assign->type = tASSIGN;
-    assign->value = 0;
+		assign->vType = tNIL;
+
     assign->children[0] = var;
     assign->children[1] = val;
 
@@ -29,9 +36,10 @@ ParseNode *createIf(ParseNode *cond, ParseNode *true) {
 	// 2 child nodes
 	ParseNode *stmt = allocateNode(2);
 
+	stmt->sType = sIF;
 	// will take value of true if cond is true, otherwise 0 (nil)
-	stmt->type = tIF;
-	stmt->value = 0;
+	stmt->vType = true->vType;
+
 	stmt->children[0] = cond;
 	stmt->children[1] = true;
 
@@ -42,9 +50,11 @@ ParseNode *createIfElse(ParseNode *cond, ParseNode *true, ParseNode *false) {
   // 3 child nodes
   ParseNode *stmt = allocateNode(3);
 
-  // takes value of true if cond is true false if cond is false
-	stmt->type = tIFELSE;
-  stmt->value = 0;
+	stmt->sType = sIFELSE;
+
+  // takes value of true if cond is true false if cond is false (assume true->vType == false->vType for building tree)
+  stmt->vType = true->vType;
+
   stmt->children[0] = cond;
   stmt->children[1] = true;
   stmt->children[2] = false;
@@ -56,21 +66,37 @@ ParseNode *createBool(BoolOp op, ParseNode *left, ParseNode *right) {
   // 2 children
   ParseNode *stmt = allocateNode(2);
 
+	stmt->sType = sBOOL;
+
   // can either be false or true (0 or 1)
-	stmt->type = tBOOL;
-  stmt->value = 0;
-  stmt->bOp = op;
+	stmt->vType = tBOOL;
+  stmt->value.boolean = 0;
+
+  stmt->op.boolop = op;
+
   stmt->children[0] = left;
   stmt->children[1] = right;
 
   return stmt;
 }
 
-ParseNode *createNumber(int value) {
+ParseNode *createBoolTerminal(int value) {
+	ParseNode *stmt = allocateNode(0);
+
+	stmt->sType = sBOOL;
+	stmt->vType = tBOOL;
+	stmt->value.boolean = value;
+
+	return stmt;
+}
+
+ParseNode *createInt(int value) {
   ParseNode *stmt = allocateNode(0);
 
-	stmt->type = tNUM;
-  stmt->value = value;
+	stmt->sType = sINT;
+
+	stmt->vType = tINT;
+  stmt->value.integer = value;
 
   return stmt;
 }
@@ -78,10 +104,10 @@ ParseNode *createNumber(int value) {
 ParseNode *createVariable(char *name) {
   ParseNode *stmt = allocateNode(0);
 
-	stmt->type = tVAR;
+	stmt->sType = sVAR;
   stmt->name = strdup(name);
-  // default to value 0
-  stmt->value = 0;
+
+	// make no assumptions about vType or value
 
   return stmt;
 }
@@ -89,11 +115,21 @@ ParseNode *createVariable(char *name) {
 ParseNode *createArith(ArithOp op, ParseNode *left, ParseNode *right) {
 	ParseNode *stmt = allocateNode(2);
 
-	stmt->type = tARITH;
-	stmt->aOp = op;
+	stmt->sType = sARITH;
+	stmt->op.arithop = op;
+
+	// real/int => real, int/int => int, int/real => real, real/real => real
+	// real*real => real, int*int => int, real*int => real
+	// real-real => real, real-int => real, int-int => int, int-real => real
+	// real+real => real, real+int => real, int+int => int
+	if (left->vType == tINT && right->vType == tINT) {
+		stmt->vType = tINT;
+	} else {
+		stmt->vType = tREAL;
+	}
+
 	stmt->children[0] = left;
 	stmt->children[1] = right;
-	stmt->value = 0;
 
 	return stmt;
 }
@@ -103,18 +139,11 @@ void deleteStatement(ParseNode *node) {
     return;
 
 	int i = 0;
-	/*for (i = 0; i < length(node->children); i++) {
-		deleteStatement(node->children[i]);
-	}*/
-	while (node->children[i] != NULL) {
+	while (node->children != NULL && node->children[i] != NULL) {
 		deleteStatement(node->children[i]);
 		i++;
 	}
 
 	free(node);
-}
-
-int length(ParseNode **nodes) {
-	int n = sizeof nodes;
-	return n / sizeof(ParseNode *);
+	node = NULL;
 }
