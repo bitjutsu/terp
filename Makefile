@@ -1,6 +1,6 @@
 # Makefile
  
-FILES   = lex.c parse.c stmt.c terp.c
+FILES   = lex.c parse.c stmt.c eval.c terp.c
 CC      = gcc
 CFLAGS  = 
  
