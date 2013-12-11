@@ -8,7 +8,7 @@ ParseNode *allocateNode(int childNum) {
 
     // child nodes
 		if (childNum != 0) {
-			node->children = (ParseNode **)malloc(sizeof(childNum*sizeof(ParseNode *) + 1));
+			node->children = (ParseNode **)malloc((childNum+1)*sizeof(ParseNode *));
 			// add null pointer for great justice (and also to avoid segfaults)
 			node->children[childNum] = NULL;
 		} else {
