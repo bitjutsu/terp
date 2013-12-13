@@ -8,10 +8,10 @@
 // nil singleton
 Element *_nil = NULL;
 Element *nil() {
-	if (_nil == NULL) {
-		_nil = (Element *)malloc(sizeof(Element));
-  	_nil->type = tNIL;
-	}
+  if (_nil == NULL) {
+    _nil = malloc(sizeof(Element));
+    _nil->type = tNIL;
+  }
 
   return _nil;
 }
@@ -37,8 +37,10 @@ Element *evaluate(ParseNode *stmt, State *state) {
 		}
 
     kh_val(state->h, k) = evaluate(stmt->children[1], state);
+		returnValue = malloc(sizeof(Element));
+		memcpy(returnValue, kh_val(state->h, k), sizeof(Element));
 
-    return kh_val(state->h, k);
+    return returnValue;
   case sIF:
     // evaluate branch iff cond = true
 		returnValue = evaluate(stmt->children[0], state);
@@ -47,9 +49,12 @@ Element *evaluate(ParseNode *stmt, State *state) {
 			return NIL;
 
     if (returnValue->value.boolean) {
+			// returnValue can't be nil, so free it
+			free(returnValue);
       return evaluate(stmt->children[1], state);
     } else {
 			// there's no else branch of the statement, so its value becomes nil
+			free(returnValue);
       return NIL;
     }
   case sIFELSE:
@@ -59,15 +64,19 @@ Element *evaluate(ParseNode *stmt, State *state) {
 		if (returnValue->type == tNIL)
 			return NIL;
 
-    if (returnValue->value.boolean)
+    if (returnValue->value.boolean) {
+			free(returnValue);
       return evaluate(stmt->children[1], state);
-    else
+    } else {
+			free(returnValue);
       return evaluate(stmt->children[2], state);
+		}
   case sBOOL:
+    returnValue = malloc(sizeof(Element));
+    returnValue->type = tBOOL;
+
 		// if no children, then it's true/false, no evaluation
     if (stmt->children == NULL) {
-  	  returnValue = (Element *)malloc(sizeof(Element));
-	    returnValue->type = tBOOL;
 		  returnValue->value.boolean = stmt->value.boolean;
       return returnValue;
     }
@@ -76,12 +85,6 @@ Element *evaluate(ParseNode *stmt, State *state) {
     left = evaluate(stmt->children[0], state);
     right = evaluate(stmt->children[1], state);
 
-		// TODO: this will need to be changed for reference types
-		if (left->type == tNIL || right->type == tNIL)
-			return NIL;
-
-    returnValue = (Element *)malloc(sizeof(Element));
-    returnValue->type = tBOOL;
     // TODO: handle real numbers
     switch(stmt->op.boolop) {
     case bLESSTHAN:
@@ -96,12 +99,20 @@ Element *evaluate(ParseNode *stmt, State *state) {
     default:
       // this is a bad problem
       error("Unknown boolean operation");
+
+			free(left);
+			free(right);
+			free(returnValue);
+
       return NIL;
     }
 
+		free(left);
+		free(right);
+
     return returnValue;
   case sINT:
-    returnValue = (Element *)malloc(sizeof(Element));
+    returnValue = malloc(sizeof(Element));
     returnValue->type = tINT;
     returnValue->value = stmt->value;
     return returnValue;
@@ -113,14 +124,18 @@ Element *evaluate(ParseNode *stmt, State *state) {
     } else {
       // stmt->value might not be correct, obtain value from state
       k = kh_get(32, state->h, stmt->name);
-      return kh_val(state->h, k);
+
+			returnValue = malloc(sizeof(Element));
+			memcpy(returnValue, kh_val(state->h, k), sizeof(Element));
+
+      return returnValue;
     }
   case sARITH:
     // TODO: handle real numbers
     left = evaluate(stmt->children[0], state);
     right = evaluate(stmt->children[1], state);
 
-    returnValue = (Element *)malloc(sizeof(Element));
+    returnValue = malloc(sizeof(Element));
     returnValue->type = tINT;
 
     switch(stmt->op.arithop) {
@@ -139,8 +154,16 @@ Element *evaluate(ParseNode *stmt, State *state) {
     default:
       // whoops
       error("Unknown arithmetic operation");
+
+			free(left);
+			free(right);
+			free(returnValue);
+
       return NIL;
     }
+
+		free(left);
+		free(right);
 
     return returnValue;
   default:
@@ -149,4 +172,9 @@ Element *evaluate(ParseNode *stmt, State *state) {
     error("Fatal: unknown statement type");
     return NIL;
   }
+}
+
+void freeNil() {
+	if (_nil != NULL)
+		free(_nil);
 }

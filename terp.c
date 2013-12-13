@@ -73,8 +73,19 @@ int exists(kh_32_t *h, char *key) {
 	return !(k == kh_end(h));
 }
 
+void freeState(State *state) {
+	int i;
+	// start at i=1, because that's the first value in khash's implementation
+	for (i = 1; i <= kh_size(state->h); i++)
+		free(state->h->vals[i]);
+
+	kh_destroy(32, state->h);
+	free(state);
+}
+
 int main(void) {
 	ParseNode *stmt = NULL;
+	Element *result = NULL;
 	khiter_t k = 0;
 	int ret = 0;
 	// TODO: handle arbitrary length input strings with buffers and scanf("%s%n")
@@ -100,14 +111,19 @@ int main(void) {
 		}
 
 		// evaluate the syntax tree
-		print(evaluate(stmt, state));
+		result = evaluate(stmt, state);
+		print(result);
 
 		// cleanup
 		deleteStatement(stmt);
 		stmt = NULL;
+
+		// make sure to not free the singleton
+		if (result->type != tNIL)
+			free(result);
 	}
 
-	kh_destroy(32, state->h);
-	return 0;
+	freeNil();
+	freeState(state);
 }
 

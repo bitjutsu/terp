@@ -144,6 +144,9 @@ void deleteStatement(ParseNode *node) {
 		i++;
 	}
 
+	if (node->children != NULL)
+		free(node->children);
+
 	free(node);
 	node = NULL;
 }

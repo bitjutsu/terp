@@ -58,7 +58,7 @@ input
     ;
 
 stmt
-    : VAR ASSIGN_INTERMEDIATE stmt { $$ = createAssign(createVariable($1), $3); }
+    : VAR ASSIGN_INTERMEDIATE stmt { $$ = createAssign(createVariable($1), $3); free($1);}
     | IF_START bool THEN stmt IF_END { $$ = createIf($2, $4); }
     | IF_START bool THEN stmt ELSE stmt IF_END { $$ = createIfElse($2, $4, $6); }
 		| exp
@@ -76,7 +76,7 @@ bool
 exp
 		: arith
     | VAL { $$ = createInt($1); }
-    | VAR { $$ = createVariable($1); }
+    | VAR { $$ = createVariable($1); free($1); }
     ;
 
 arith
