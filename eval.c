@@ -38,7 +38,7 @@ Element *evaluate(ParseNode *stmt, State *state) {
 
     kh_val(state->h, k) = evaluate(stmt->children[1], state);
 
-    return NIL;
+    return kh_val(state->h, k);
   case sIF:
     // evaluate branch iff cond = true
 		returnValue = evaluate(stmt->children[0], state);
