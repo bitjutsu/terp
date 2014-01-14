@@ -2,7 +2,7 @@
  
 FILES   = lex.c parse.c stmt.c eval.c terp.c
 CC      = gcc
-CFLAGS  = 
+CFLAGS  = -lreadline
  
 terp: $(FILES)
 	$(CC) $(CFLAGS) $(FILES) -o terp
