@@ -24,3 +24,6 @@ lex.h
 parse.c
 parse.h
 
+# configuration files
+.terp_history
+

@@ -7,6 +7,13 @@
 
 #include <stdio.h>
 
+// for history functionality
+#include <readline/readline.h>
+#include <readline/history.h>
+
+// TODO: make global history in user's home directory
+const char *HISTORY_FILENAME = ".terp_history";
+
 void error(char *msg) {
 	printf("%s\n", msg);
 }
@@ -83,27 +90,41 @@ void freeState(State *state) {
 	free(state);
 }
 
+void setupHistory() {
+	rl_bind_key('\t', rl_complete);
+
+	using_history();
+	// set max history size
+	// TODO: command line flag
+	stifle_history(15);
+
+	// read history file from disk
+	read_history_range(HISTORY_FILENAME, 0, 15);
+}
+
 int main(void) {
 	ParseNode *stmt = NULL;
 	Element *result = NULL;
 	khiter_t k = 0;
 	int ret = 0;
 	// TODO: handle arbitrary length input strings with buffers and scanf("%s%n")
-	char test[256];
+	char *input;
 
 	// interpreter state
 	State *state = initState();
 
+	setupHistory();
 	hello();
 
 	while (1) {
-		printf("> ");
-		fgets(test, 256, stdin);
+		input = readline("> ");
 
-		if (strcmp(test, "quit\n") == 0)
+		if (strcmp(input, "quit") == 0)
 			break;
 
-		stmt = buildST(test);
+		add_history(input);
+
+		stmt = buildST(input);
 
 		if (stmt == NULL) {
 			printf("Could not build syntax tree.\n");
@@ -121,7 +142,11 @@ int main(void) {
 		// make sure to not free the singleton
 		if (result->type != tNIL)
 			free(result);
+
+		free(input);
 	}
+
+	write_history(HISTORY_FILENAME);
 
 	freeNil();
 	freeState(state);
