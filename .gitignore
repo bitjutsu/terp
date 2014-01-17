@@ -27,3 +27,5 @@ parse.h
 # configuration files
 .terp_history
 
+# terp scripts
+*.te
