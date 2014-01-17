@@ -102,16 +102,60 @@ void setupHistory() {
 	read_history_range(HISTORY_FILENAME, 0, 15);
 }
 
-int main(void) {
-	ParseNode *stmt = NULL;
+Element *evaluateLine(char *line, State *state) {
+	ParseNode *stmt = buildST(line);
+	Element *val = NULL;
+
+	if (stmt == NULL) {
+		error("Could not build syntax tree.");
+		return NULL;
+	}
+
+	/* Evaluate the syntax tree */
+	val = evaluate(stmt, state);
+	deleteStatement(stmt);
+
+	return val;
+}
+
+void interpretScript(char *file, State *state) {
+	/* Open the script file specified on the command line */
+	FILE *script = fopen(file, "r");
+
+	char *line;
+	size_t len = 0;
+	Element *result;
+
+	if (script) {
+		while (getline(&line, &len, script) != -1) {
+
+			/* Don't care about the return value of each statement, the script will handle its own output.
+			Still take return value so that it can be freed. */
+			result = evaluateLine(line, state);
+			free(result);
+
+			free(line);
+			line = NULL;
+		}
+	} else {
+		error("Could not open script!");
+		exit(-1);
+	}
+}
+
+int main(int argc, char *argv[]) {
 	Element *result = NULL;
-	khiter_t k = 0;
-	int ret = 0;
-	// TODO: handle arbitrary length input strings with buffers and scanf("%s%n")
 	char *input;
 
-	// interpreter state
+	/* Interpreter session state */
 	State *state = initState();
+
+	if (argc > 1) {
+		/* For now, accept no command line arguments apart from script interpreter functionality */
+
+		interpretScript(argv[1], state);
+		return 0;
+	}
 
 	setupHistory();
 	hello();
@@ -124,20 +168,10 @@ int main(void) {
 
 		add_history(input);
 
-		stmt = buildST(input);
-
-		if (stmt == NULL) {
-			printf("Could not build syntax tree.\n");
-			continue;
-		}
-
-		// evaluate the syntax tree
-		result = evaluate(stmt, state);
+		result = evaluateLine(input, state);
 		print(result);
 
 		// cleanup
-		deleteStatement(stmt);
-		stmt = NULL;
 
 		// make sure to not free the singleton
 		if (result->type != tNIL)
