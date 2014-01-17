@@ -2,9 +2,9 @@
 #define __STMT_H__
 
 typedef enum tagBoolOp {
-  bLESSTHAN,
-  bGREATERTHAN,
-  bEQUALTO
+	bLESSTHAN,
+	bGREATERTHAN,
+	bEQUALTO
 } BoolOp;
 
 typedef enum tagArithOp {
@@ -55,17 +55,17 @@ typedef union tagOp {
 
 // TODO: not everything has a name or an operation
 typedef struct tagParseNode {
-  StmtType sType;
+	StmtType sType;
 	Op op;
 
-  char *name;
+	char *name;
 
 	// all statements have a value - gets propagated up tree from leaves when evaluating
 	ValueType vType;
 	Value value;
 
 	// tree isn't necessarily binary
-  struct tagParseNode **children;
+	struct tagParseNode **children;
 } ParseNode;
 
 // Create an assignment (this and all below will be added to the parse tree in the parser)

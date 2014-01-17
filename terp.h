@@ -7,7 +7,7 @@
 KHASH_MAP_INIT_STR(32, Element *)
 
 typedef struct tagState {
-  khash_t(32) *h;
+	khash_t(32) *h;
 } State;
 
 #endif

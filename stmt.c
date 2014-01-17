@@ -4,32 +4,32 @@
 #include <string.h>
 
 ParseNode *allocateNode(int childNum) {
-    ParseNode *node = (ParseNode *)malloc(sizeof *node);
+	ParseNode *node = (ParseNode *)malloc(sizeof *node);
 
-    // child nodes
-		if (childNum != 0) {
-			node->children = (ParseNode **)malloc((childNum+1)*sizeof(ParseNode *));
-			// add null pointer for great justice (and also to avoid segfaults)
-			node->children[childNum] = NULL;
-		} else {
-			node->children = NULL;
-		}
+	// child nodes
+	if (childNum != 0) {
+		node->children = (ParseNode **)malloc((childNum+1)*sizeof(ParseNode *));
+		// add null pointer for great justice (and also to avoid segfaults)
+		node->children[childNum] = NULL;
+	} else {
+		node->children = NULL;
+	}
 
-    return node;
+	return node;
 }
 
 ParseNode *createAssign(ParseNode *var, ParseNode *val) {
-    // 2 child nodes required
-    ParseNode *assign = allocateNode(2);
+	// 2 child nodes required
+	ParseNode *assign = allocateNode(2);
 
-		assign->sType = sASSIGN;
-    // assign takes value 0 (nil)
-		assign->vType = tNIL;
+	assign->sType = sASSIGN;
+	// assign takes value 0 (nil)
+	assign->vType = tNIL;
 
-    assign->children[0] = var;
-    assign->children[1] = val;
+	assign->children[0] = var;
+	assign->children[1] = val;
 
-    return assign;
+	return assign;
 }
 
 ParseNode *createIf(ParseNode *cond, ParseNode *true) {
@@ -47,37 +47,37 @@ ParseNode *createIf(ParseNode *cond, ParseNode *true) {
 }
 
 ParseNode *createIfElse(ParseNode *cond, ParseNode *true, ParseNode *false) {
-  // 3 child nodes
-  ParseNode *stmt = allocateNode(3);
+	// 3 child nodes
+	ParseNode *stmt = allocateNode(3);
 
 	stmt->sType = sIFELSE;
 
-  // takes value of true if cond is true false if cond is false (assume true->vType == false->vType for building tree)
-  stmt->vType = true->vType;
+	// takes value of true if cond is true false if cond is false (assume true->vType == false->vType for building tree)
+	stmt->vType = true->vType;
 
-  stmt->children[0] = cond;
-  stmt->children[1] = true;
-  stmt->children[2] = false;
+	stmt->children[0] = cond;
+	stmt->children[1] = true;
+	stmt->children[2] = false;
 
-  return stmt;
+	return stmt;
 }
 
 ParseNode *createBool(BoolOp op, ParseNode *left, ParseNode *right) {
-  // 2 children
-  ParseNode *stmt = allocateNode(2);
+	// 2 children
+	ParseNode *stmt = allocateNode(2);
 
 	stmt->sType = sBOOL;
 
-  // can either be false or true (0 or 1)
+	// can either be false or true (0 or 1)
 	stmt->vType = tBOOL;
-  stmt->value.boolean = 0;
+	stmt->value.boolean = 0;
 
-  stmt->op.boolop = op;
+	stmt->op.boolop = op;
 
-  stmt->children[0] = left;
-  stmt->children[1] = right;
+	stmt->children[0] = left;
+	stmt->children[1] = right;
 
-  return stmt;
+	return stmt;
 }
 
 ParseNode *createBoolTerminal(int value) {
@@ -91,25 +91,25 @@ ParseNode *createBoolTerminal(int value) {
 }
 
 ParseNode *createInt(int value) {
-  ParseNode *stmt = allocateNode(0);
+	ParseNode *stmt = allocateNode(0);
 
 	stmt->sType = sINT;
 
 	stmt->vType = tINT;
-  stmt->value.integer = value;
+	stmt->value.integer = value;
 
-  return stmt;
+	return stmt;
 }
 
 ParseNode *createVariable(char *name) {
-  ParseNode *stmt = allocateNode(0);
+	ParseNode *stmt = allocateNode(0);
 
 	stmt->sType = sVAR;
-  stmt->name = strdup(name);
+	stmt->name = strdup(name);
 
 	// make no assumptions about vType or value
 
-  return stmt;
+	return stmt;
 }
 
 ParseNode *createArith(ArithOp op, ParseNode *left, ParseNode *right) {
@@ -135,8 +135,8 @@ ParseNode *createArith(ArithOp op, ParseNode *left, ParseNode *right) {
 }
 
 void deleteStatement(ParseNode *node) {
-  if (node == NULL)
-    return;
+	if (node == NULL)
+		return;
 
 	int i = 0;
 	while (node->children != NULL && node->children[i] != NULL) {
