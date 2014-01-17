@@ -5,6 +5,7 @@
 #include "terp.h"
 
 Element *evaluate(ParseNode *stmt, State *state);
+Element *evaluateLine(char *line, State *state);
 void freeNil();
 
 #endif

@@ -1,6 +1,4 @@
 #include "stmt.h"
-#include "parse.h"
-#include "lex.h"
 #include "khash.h"
 #include "eval.h"
 #include "terp.h"
@@ -50,30 +48,6 @@ State *initState() {
 	return ret;
 }
 
-ParseNode *buildST(const char *input) {
-	ParseNode *stmt;
-    yyscan_t scanner;
-    YY_BUFFER_STATE state;
-
-    if (yylex_init(&scanner)) {
-        // couldn't initialize
-        return NULL;
-    }
-
-	state = yy_scan_string(input, scanner);
-
-    if (yyparse(&stmt, scanner)) {
-        // error parsing
-        return NULL;
-    }
-
-    yy_delete_buffer(state, scanner);
-
-    yylex_destroy(scanner);
-
-    return stmt;
-}
-
 // convenience function for hashmap "exists"
 int exists(kh_32_t *h, char *key) {
 	khiter_t k = kh_get(32, h, key);
@@ -100,22 +74,6 @@ void setupHistory() {
 
 	// read history file from disk
 	read_history_range(HISTORY_FILENAME, 0, 15);
-}
-
-Element *evaluateLine(char *line, State *state) {
-	ParseNode *stmt = buildST(line);
-	Element *val = NULL;
-
-	if (stmt == NULL) {
-		error("Could not build syntax tree.");
-		return NULL;
-	}
-
-	/* Evaluate the syntax tree */
-	val = evaluate(stmt, state);
-	deleteStatement(stmt);
-
-	return val;
 }
 
 void interpretScript(char *file, State *state) {
@@ -185,4 +143,3 @@ int main(int argc, char *argv[]) {
 	freeNil();
 	freeState(state);
 }
-

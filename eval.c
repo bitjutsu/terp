@@ -3,6 +3,9 @@
 #include "terp.h"
 #include "khash.h"
 
+#include "parse.h"
+#include "lex.h"
+
 #define NIL nil()
 
 // nil singleton
@@ -172,6 +175,46 @@ Element *evaluate(ParseNode *stmt, State *state) {
     error("Fatal: unknown statement type");
     return NIL;
   }
+}
+
+ParseNode *buildST(const char *input) {
+	ParseNode *stmt;
+	yyscan_t scanner;
+	YY_BUFFER_STATE state;
+
+	if (yylex_init(&scanner)) {
+		// couldn't initialize
+		return NULL;
+	}
+
+	state = yy_scan_string(input, scanner);
+
+	if (yyparse(&stmt, scanner)) {
+		// error parsing
+		return NULL;
+	}
+
+	yy_delete_buffer(state, scanner);
+
+	yylex_destroy(scanner);
+
+	return stmt;
+}
+
+Element *evaluateLine(char *line, State *state) {
+	ParseNode *stmt = buildST(line);
+	Element *val = NULL;
+
+	if (stmt == NULL) {
+		error("Could not build syntax tree.");
+		return NULL;
+	}
+
+	/* Evaluate the syntax tree */
+	val = evaluate(stmt, state);
+	deleteStatement(stmt);
+
+	return val;
 }
 
 void freeNil() {
